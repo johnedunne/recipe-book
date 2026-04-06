@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<!--
+=======================================================================
+  PANTRY → PLATE  |  My Recipe Book  |  recipes.html
+=======================================================================
+
+  This file is your personal recipe database.
+  The main app (index.html) reads this file automatically.
+
+  HOW TO ADD A RECIPE
+  ───────────────────
+  Copy one <article class="recipe"> block and fill in your details.
+  Everything between <!-- and --> is a comment and won't be read.
+  Only the tags inside <article class="recipe"> matter.
+
+  REQUIRED vs OPTIONAL TAGS
+  ──────────────────────────
+  Required  →  <r-name>, <r-ingredients>, <r-steps>
+  Optional  →  everything else (omit tags you don't need)
+
+  TAG REFERENCE
+  ─────────────
+
+  <r-name>          The recipe title. Keep it short and descriptive.
+                    Example: <r-name>Lemon Garlic Roast Chicken</r-name>
+
+  <r-category>      One word category for filtering.
+                    Suggested: Chicken, Beef, Pork, Seafood, Vegetarian,
+                               Vegan, Pasta, Dessert, Breakfast, Soup,
+                               Salad, Snack, Baking, Lamb, Side
+                    Example: <r-category>Chicken</r-category>
+
+  <r-cuisine>       The cuisine/origin style.
+                    Example: <r-cuisine>Italian</r-cuisine>
+
+  <r-time>          Total cooking + prep time as a short string.
+                    Example: <r-time>45 min</r-time>
+
+  <r-difficulty>    Skill level: Easy, Medium, or Hard
+                    Example: <r-difficulty>Easy</r-difficulty>
+
+  <r-servings>      Number of people it serves.
+                    Example: <r-servings>4</r-servings>
+
+  <r-image>         URL or relative path to a photo.
+                    • Relative path: images/chicken.jpg  (put image in
+                      an /images/ folder next to this file)
+                    • External URL: https://example.com/photo.jpg
+                    Example: <r-image>images/roast-chicken.jpg</r-image>
+
+  <r-description>   A 1–2 sentence description shown on the card.
+                    Example: <r-description>A crispy, golden roast chicken
+                    with bright lemon and plenty of garlic.</r-description>
+
+  <r-tip>           A single practical cooking tip shown on the card.
+                    Example: <r-tip>Rest the chicken for 10 minutes
+                    before carving.</r-tip>
+
+  <r-ingredients>   List of ingredients. Use one <li> per ingredient.
+                    Format each <li> as:  quantity unit, ingredient name
+                    The part after the comma is used for ingredient
+                    matching, so keep it a clean ingredient name.
+                    Example:
+                    <r-ingredients>
+                      <li>1 whole, chicken</li>
+                      <li>4 cloves, garlic</li>
+                      <li>2, lemon</li>
+                      <li>3 tbsp, olive oil</li>
+                      <li>1 tsp, salt</li>
+                      <li>1 tsp, black pepper</li>
+                      <li>Fresh, rosemary</li>
+                    </r-ingredients>
+
+  <r-steps>         Numbered cooking instructions. Use one <li> per step.
+                    Example:
+                    <r-steps>
+                      <li>Preheat oven to 200°C (400°F).</li>
+                      <li>Pat chicken dry and rub with olive oil.</li>
+                      <li>Stuff with lemon halves and garlic.</li>
+                      <li>Season generously with salt and pepper.</li>
+                      <li>Roast for 1 hour 20 minutes until juices run clear.</li>
+                      <li>Rest for 10 minutes before serving.</li>
+                    </r-steps>
+
+  <r-source>        A URL to the original recipe website (optional link).
+                    Example: <r-source>https://www.example.com/recipe</r-source>
+
+  <r-youtube>       A YouTube video URL for a video walkthrough.
+                    Example: <r-youtube>https://www.youtube.com/watch?v=abc123</r-youtube>
+
+  <r-tags>          Comma-separated extra searchable keywords.
+                    Good for dietary notes or alternate names.
+                    Example: <r-tags>gluten-free, dairy-free, weeknight</r-tags>
+
+=======================================================================
+  TIPS
+  ─────
+  • You can have as many <article class="recipe"> blocks as you like.
+  • Keep each recipe self-contained between its <article> tags.
+  • The file is read fresh each time you search — no restart needed.
+  • Images are optional; cards look fine without them.
+  • Keep ingredient names simple: "chicken breast" not "boneless
+    skinless chicken breast, trimmed" — simpler names match better.
+=======================================================================
+-->
+<html lang="en">
+<head><meta charset="UTF-8"><title>My Recipes</title></head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  RECIPE 1 — Lemon Garlic Roast Chicken                     -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<article class="recipe">
+  <r-name>Lemon Garlic Roast Chicken</r-name>
+  <r-category>Chicken</r-category>
+  <r-cuisine>French</r-cuisine>
+  <r-time>1 hr 30 min</r-time>
+  <r-difficulty>Easy</r-difficulty>
+  <r-servings>4</r-servings>
+  <r-image>https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Good_Food_Display_-_NCI_Visuals_Online.jpg/320px-Good_Food_Display_-_NCI_Visuals_Online.jpg</r-image>
+  <r-description>A golden, crispy-skinned roast chicken bursting with lemon and garlic. The perfect Sunday dinner that looks impressive but needs almost no effort.</r-description>
+  <r-tip>Pat the chicken completely dry before roasting — this is the secret to really crispy skin.</r-tip>
+  <r-ingredients>
+    <li>1 whole, chicken</li>
+    <li>4 cloves, garlic</li>
+    <li>2, lemon</li>
+    <li>3 tbsp, olive oil</li>
+    <li>1 tsp, salt</li>
+    <li>1 tsp, black pepper</li>
+    <li>Small bunch, fresh rosemary</li>
+    <li>1, onion</li>
+  </r-ingredients>
+  <r-steps>
+    <li>Preheat your oven to 200°C (400°F / Gas Mark 6).</li>
+    <li>Pat the chicken completely dry with paper towels, inside and out.</li>
+    <li>Cut the lemons in half and crush the garlic cloves with the flat of a knife.</li>
+    <li>Stuff the cavity with lemon halves, garlic, and rosemary sprigs.</li>
+    <li>Rub the outside of the chicken all over with olive oil, then season generously with salt and pepper.</li>
+    <li>Place on a rack in a roasting tin. Surround with halved onions.</li>
+    <li>Roast for 20 minutes per 500g plus an extra 20 minutes (roughly 1 hr 20 min for a 1.8kg bird).</li>
+    <li>Check doneness by piercing the thigh — juices should run completely clear.</li>
+    <li>Rest uncovered for 10–15 minutes before carving and serving.</li>
+  </r-steps>
+  <r-tags>roast, sunday dinner, gluten-free, dairy-free</r-tags>
+</article>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  RECIPE 2 — Spaghetti Carbonara                            -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<article class="recipe">
+  <r-name>Spaghetti Carbonara</r-name>
+  <r-category>Pasta</r-category>
+  <r-cuisine>Italian</r-cuisine>
+  <r-time>25 min</r-time>
+  <r-difficulty>Medium</r-difficulty>
+  <r-servings>2</r-servings>
+  <r-description>The real Roman carbonara — no cream, just eggs, pecorino, guanciale and pasta water creating a silky, rich sauce that clings to every strand.</r-description>
+  <r-tip>The heat of the pasta cooks the eggs. Remove the pan from the heat before adding the egg mixture to avoid scrambling.</r-tip>
+  <r-ingredients>
+    <li>200g, spaghetti</li>
+    <li>100g, guanciale</li>
+    <li>2 large, egg</li>
+    <li>1, egg yolk</li>
+    <li>50g, pecorino romano</li>
+    <li>50g, parmesan</li>
+    <li>1 tsp, black pepper</li>
+    <li>Salt, for pasta water</li>
+  </r-ingredients>
+  <r-steps>
+    <li>Bring a large pot of heavily salted water to the boil.</li>
+    <li>While it heats, cut the guanciale into small cubes or strips.</li>
+    <li>In a bowl, whisk together the eggs, egg yolk, finely grated pecorino, and parmesan. Season with plenty of black pepper.</li>
+    <li>Fry the guanciale in a wide pan over medium heat until golden and the fat has rendered. Turn off the heat.</li>
+    <li>Cook the spaghetti until al dente. Reserve at least a mug of pasta cooking water before draining.</li>
+    <li>Add the drained pasta to the guanciale pan and toss well off the heat.</li>
+    <li>Add the egg and cheese mixture and toss vigorously, adding a splash of pasta water to loosen into a creamy sauce.</li>
+    <li>Serve immediately with extra grated pecorino and a crack of black pepper.</li>
+  </r-steps>
+  <r-source>https://www.example.com/carbonara</r-source>
+  <r-tags>quick, weeknight, italian classic</r-tags>
+</article>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  RECIPE 3 — Simple Tomato & Basil Soup                     -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<article class="recipe">
+  <r-name>Simple Tomato &amp; Basil Soup</r-name>
+  <r-category>Soup</r-category>
+  <r-cuisine>Italian</r-cuisine>
+  <r-time>35 min</r-time>
+  <r-difficulty>Easy</r-difficulty>
+  <r-servings>4</r-servings>
+  <r-description>A velvety, vibrant tomato soup made from pantry staples. Roasting the tomatoes first concentrates their sweetness beautifully.</r-description>
+  <r-tip>Add a small pinch of sugar if your tomatoes taste too acidic.</r-tip>
+  <r-ingredients>
+    <li>800g, tomato</li>
+    <li>1, onion</li>
+    <li>4 cloves, garlic</li>
+    <li>2 tbsp, olive oil</li>
+    <li>500ml, vegetable stock</li>
+    <li>Small bunch, fresh basil</li>
+    <li>1 tsp, salt</li>
+    <li>1/2 tsp, black pepper</li>
+    <li>1 tsp, sugar</li>
+  </r-ingredients>
+  <r-steps>
+    <li>Preheat oven to 180°C (350°F). Halve the tomatoes and place cut-side up on a baking tray.</li>
+    <li>Scatter over the whole garlic cloves (unpeeled), drizzle with olive oil, and season with salt and pepper.</li>
+    <li>Roast for 25 minutes until soft and slightly caramelised at the edges.</li>
+    <li>Meanwhile, soften the diced onion in a large saucepan with a little olive oil over medium-low heat, about 10 minutes.</li>
+    <li>Squeeze the roasted garlic out of its skins into the onion pan. Add the roasted tomatoes and all their juices.</li>
+    <li>Pour in the vegetable stock and bring to a gentle simmer for 5 minutes.</li>
+    <li>Add the fresh basil leaves, then blend until completely smooth with a stick blender.</li>
+    <li>Taste and adjust seasoning. Serve with crusty bread and a drizzle of olive oil.</li>
+  </r-steps>
+  <r-tags>vegan, vegetarian, gluten-free, comfort food</r-tags>
+</article>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  ADD YOUR OWN RECIPES BELOW — copy this block to start:   -->
+<!-- ═══════════════════════════════════════════════════════════
+
+<article class="recipe">
+  <r-name>Your Recipe Name</r-name>
+  <r-category>Chicken</r-category>
+  <r-cuisine>British</r-cuisine>
+  <r-time>30 min</r-time>
+  <r-difficulty>Easy</r-difficulty>
+  <r-servings>4</r-servings>
+  <r-image>images/your-photo.jpg</r-image>
+  <r-description>A short description of your dish.</r-description>
+  <r-tip>Your best tip for making this recipe.</r-tip>
+  <r-ingredients>
+    <li>Amount unit, ingredient name</li>
+    <li>Amount unit, ingredient name</li>
+    <li>Amount unit, ingredient name</li>
+  </r-ingredients>
+  <r-steps>
+    <li>First step.</li>
+    <li>Second step.</li>
+    <li>Third step.</li>
+  </r-steps>
+  <r-tags>keyword1, keyword2</r-tags>
+</article>
+
+-->
+
+</body>
+</html>
