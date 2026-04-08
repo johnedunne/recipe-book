@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recipe Editor — My Recipe Book</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #faf6ef; --warm-white: #fff9f2; --ink: #1c1712;
+    --brown: #6b4226; --amber: #c97d2e; --sage: #7a8c6e;
+    --rust: #c0431f; --muted: #9a8e82; --border: #e2d9ce;
+    --card-bg: #fffdf9; --green: #4a7c59;
+  }
+
+  html, body {
+    min-height: 100%; font-family: 'DM Sans', sans-serif;
+    background: var(--cream); color: var(--ink);
+  }
+
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      radial-gradient(ellipse at 15% 10%, rgba(201,125,46,0.07) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 90%, rgba(122,140,110,0.09) 0%, transparent 50%);
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(250,246,239,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 40px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .logo { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: var(--brown); }
+  .logo span { color: var(--amber); font-style: italic; }
+  .logo-sub { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; }
+  .nav-link {
+    margin-left: auto; font-size: 0.82rem; color: var(--amber); text-decoration: none;
+    font-weight: 500; padding: 7px 14px; border: 1.5px solid rgba(201,125,46,0.3);
+    border-radius: 8px; transition: all 0.2s;
+  }
+  .nav-link:hover { background: var(--amber); color: white; border-color: var(--amber); }
+
+  /* ── LAYOUT ── */
+  .page {
+    position: relative; z-index: 1;
+    max-width: 1200px; margin: 0 auto;
+    padding: 36px 40px 60px;
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 32px;
+    align-items: start;
+  }
+
+  /* ── SECTION HEADINGS ── */
+  .section-title {
+    font-family: 'Playfair Display', serif; font-size: 1.25rem;
+    color: var(--brown); margin-bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── FORM CARD ── */
+  .form-card {
+    background: var(--card-bg); border: 1.5px solid var(--border);
+    border-radius: 18px; padding: 32px; display: flex; flex-direction: column; gap: 24px;
+  }
+
+  .field-group { display: flex; flex-direction: column; gap: 6px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+  label {
+    font-size: 0.78rem; font-weight: 500; color: var(--brown);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  label .optional { color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 0; margin-left: 4px; }
+
+  input[type="text"], input[type="url"], input[type="number"], textarea, select {
+    width: 100%; padding: 10px 14px;
+    border: 1.5px solid var(--border); border-radius: 9px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+    background: var(--warm-white); color: var(--ink); outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--amber); box-shadow: 0 0 0 3px rgba(201,125,46,0.1);
+  }
+  input::placeholder, textarea::placeholder { color: var(--muted); }
+  textarea { resize: vertical; line-height: 1.6; }
+
+  /* ── DYNAMIC LISTS (ingredients / steps) ── */
+  .list-editor { display: flex; flex-direction: column; gap: 8px; }
+
+  .list-item-row {
+    display: flex; gap: 8px; align-items: center;
+    animation: popIn 0.18s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+  .list-item-row input { flex: 1; }
+  .list-item-row .measure-input { flex: 0 0 110px; }
+
+  .remove-row-btn {
+    width: 32px; height: 32px; flex-shrink: 0; border: none;
+    background: rgba(192,67,31,0.08); color: var(--rust); border-radius: 7px;
+    cursor: pointer; font-size: 1rem; transition: background 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .remove-row-btn:hover { background: rgba(192,67,31,0.18); }
+
+  .drag-handle {
+    width: 24px; flex-shrink: 0; cursor: grab; color: var(--border);
+    font-size: 1.1rem; text-align: center; user-select: none;
+    transition: color 0.15s;
+  }
+  .drag-handle:hover { color: var(--muted); }
+  .list-item-row.dragging { opacity: 0.4; }
+  .list-item-row.drag-over { border-top: 2px solid var(--amber); }
+
+  .add-row-btn {
+    align-self: flex-start; padding: 7px 14px;
+    background: rgba(201,125,46,0.08); color: var(--amber);
+    border: 1.5px dashed rgba(201,125,46,0.4); border-radius: 8px;
+    font-size: 0.82rem; font-weight: 500; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .add-row-btn:hover { background: rgba(201,125,46,0.15); border-style: solid; }
+
+  .step-number {
+    width: 24px; flex-shrink: 0; font-size: 0.78rem; color: var(--muted);
+    font-weight: 600; text-align: center; padding-top: 2px;
+  }
+
+  /* ── SUBMIT BUTTONS ── */
+  .form-actions { display: flex; flex-direction: column; gap: 10px; padding-top: 8px; }
+
+  .btn-primary {
+    width: 100%; padding: 14px; background: var(--brown); color: var(--cream);
+    border: none; border-radius: 12px; font-family: 'Playfair Display', serif;
+    font-size: 1rem; font-style: italic; cursor: pointer;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 4px 16px rgba(107,66,38,0.2);
+  }
+  .btn-primary:hover { background: var(--rust); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(192,67,31,0.25); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-secondary {
+    width: 100%; padding: 11px; background: transparent; color: var(--sage);
+    border: 1.5px solid rgba(122,140,110,0.35); border-radius: 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.88rem; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { background: rgba(122,140,110,0.08); border-color: var(--sage); }
+
+  .btn-ghost {
+    width: 100%; padding: 11px; background: transparent; color: var(--muted);
+    border: 1.5px solid var(--border); border-radius: 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.85rem; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-ghost:hover { color: var(--rust); border-color: var(--rust); }
+
+  /* ── RIGHT COLUMN: SIDEBAR ── */
+  .sidebar { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 90px; }
+
+  /* Preview card */
+  .preview-card {
+    background: var(--card-bg); border: 1.5px solid var(--border);
+    border-radius: 18px; overflow: hidden;
+  }
+  .preview-header {
+    padding: 14px 18px; background: rgba(201,125,46,0.07);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.78rem; font-weight: 500; color: var(--brown);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .preview-live { font-size: 0.68rem; color: var(--sage); font-weight: 400; text-transform: none; letter-spacing: 0; }
+
+  .preview-img {
+    width: 100%; height: 140px; object-fit: cover; display: block;
+    background: var(--border);
+  }
+  .preview-no-img {
+    height: 140px; display: flex; align-items: center; justify-content: center;
+    font-size: 3rem; background: linear-gradient(135deg, var(--cream), var(--border));
+    color: rgba(107,66,38,0.2);
+  }
+
+  .preview-body { padding: 16px 18px; }
+  .preview-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .preview-badge {
+    font-size: 0.68rem; padding: 2px 8px; border-radius: 100px;
+    border: 1px solid var(--border); color: var(--muted); background: var(--cream);
+  }
+  .preview-name { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: var(--brown); margin-bottom: 4px; }
+  .preview-desc { font-size: 0.8rem; color: #5a4f45; line-height: 1.55; margin-bottom: 10px; }
+  .preview-ings { display: flex; flex-wrap: wrap; gap: 4px; }
+  .preview-ing { font-size: 0.72rem; padding: 2px 8px; border-radius: 100px; border: 1px solid var(--border); color: var(--ink); background: var(--cream); }
+  .preview-empty { font-size: 0.82rem; color: var(--muted); font-style: italic; text-align: center; padding: 16px 0; }
+
+  /* Output box */
+  .output-card {
+    background: var(--card-bg); border: 1.5px solid var(--border);
+    border-radius: 18px; overflow: hidden; display: none;
+  }
+  .output-card.visible { display: block; }
+  .output-header {
+    padding: 14px 18px; background: rgba(74,124,89,0.08);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.78rem; font-weight: 500; color: var(--green);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .copy-btn {
+    font-size: 0.72rem; padding: 4px 10px; border: 1px solid rgba(74,124,89,0.35);
+    border-radius: 6px; background: transparent; color: var(--green);
+    cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif;
+  }
+  .copy-btn:hover { background: var(--green); color: white; }
+  .copy-btn.copied { background: var(--green); color: white; }
+
+  .output-code {
+    padding: 14px 18px; font-family: 'Courier New', monospace; font-size: 0.7rem;
+    line-height: 1.7; color: #3a3028; background: #fdf8f2;
+    white-space: pre-wrap; word-break: break-all;
+    max-height: 260px; overflow-y: auto;
+  }
+
+  /* Instructions panel */
+  .instructions-card {
+    background: var(--card-bg); border: 1.5px solid var(--border);
+    border-radius: 18px; padding: 20px 22px;
+  }
+  .instructions-title { font-size: 0.78rem; font-weight: 500; color: var(--brown); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+  .step-row { display: flex; gap: 10px; margin-bottom: 12px; }
+  .step-num {
+    width: 22px; height: 22px; border-radius: 50%; background: var(--amber);
+    color: white; font-size: 0.7rem; font-weight: 600; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .step-text { font-size: 0.82rem; color: #5a4f45; line-height: 1.55; padding-top: 2px; }
+  .step-text strong { color: var(--brown); }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--brown); color: white; padding: 12px 22px; border-radius: 10px;
+    font-size: 0.85rem; font-weight: 500; opacity: 0; pointer-events: none;
+    transition: opacity 0.25s, transform 0.25s; z-index: 999;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+  @media (max-width: 900px) {
+    .page { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+    header { padding: 14px 20px; }
+    .page { padding: 24px 20px 40px; }
+    .field-row, .field-row-3 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">My <span>Recipe</span> Book</div>
+    <div class="logo-sub">Recipe Editor</div>
+  </div>
+  <a href="index.html" class="nav-link">← Back to Recipe Book</a>
+</header>
+
+<div class="page">
+
+  <!-- ── LEFT: FORM ── -->
+  <div>
+    <div class="form-card">
+
+      <!-- Basic Info -->
+      <div>
+        <div class="section-title">Basic Info</div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="field-group">
+            <label>Recipe Name</label>
+            <input type="text" id="f-name" placeholder="e.g. Lemon Garlic Roast Chicken" />
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label>Category</label>
+              <select id="f-category">
+                <option value="">Select…</option>
+                <option>Beef</option><option>Chicken</option><option>Pork</option>
+                <option>Lamb</option><option>Seafood</option><option>Pasta</option>
+                <option>Vegetarian</option><option>Vegan</option><option>Soup</option>
+                <option>Salad</option><option>Breakfast</option><option>Dessert</option>
+                <option>Baking</option><option>Snack</option><option>Side</option>
+                <option>Miscellaneous</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label>Cuisine <span class="optional">(optional)</span></label>
+              <input type="text" id="f-cuisine" placeholder="e.g. Italian, French, Thai" />
+            </div>
+          </div>
+          <div class="field-row-3">
+            <div class="field-group">
+              <label>Total Time <span class="optional">(optional)</span></label>
+              <input type="text" id="f-time" placeholder="e.g. 45 min" />
+            </div>
+            <div class="field-group">
+              <label>Difficulty <span class="optional">(optional)</span></label>
+              <select id="f-difficulty">
+                <option value="">Select…</option>
+                <option>Easy</option><option>Medium</option><option>Hard</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label>Servings <span class="optional">(optional)</span></label>
+              <input type="number" id="f-servings" placeholder="4" min="1" max="100" />
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Photo URL <span class="optional">(optional — paste a URL or relative path like images/photo.jpg)</span></label>
+            <input type="url" id="f-image" placeholder="https://example.com/photo.jpg" />
+          </div>
+          <div class="field-group">
+            <label>Short Description <span class="optional">(optional — shown on the card)</span></label>
+            <textarea id="f-description" rows="2" placeholder="A brief, appetising description of the dish…"></textarea>
+          </div>
+          <div class="field-group">
+            <label>Cooking Tip <span class="optional">(optional)</span></label>
+            <input type="text" id="f-tip" placeholder="e.g. Pat the chicken dry before roasting for crispier skin." />
+          </div>
+        </div>
+      </div>
+
+      <!-- Ingredients -->
+      <div>
+        <div class="section-title">Ingredients</div>
+        <div class="list-editor" id="ingredientsList"></div>
+        <button class="add-row-btn" id="addIngredientBtn" style="margin-top:8px;">+ Add ingredient</button>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:8px;line-height:1.5;">
+          Format: <strong>Quantity / unit</strong> in the first box, <strong>ingredient name</strong> in the second.<br>
+          The name is used for pantry matching — keep it simple (e.g. "chicken" not "boneless skinless chicken breast").
+        </div>
+      </div>
+
+      <!-- Steps -->
+      <div>
+        <div class="section-title">Method / Steps</div>
+        <div class="list-editor" id="stepsList"></div>
+        <button class="add-row-btn" id="addStepBtn" style="margin-top:8px;">+ Add step</button>
+      </div>
+
+      <!-- Links -->
+      <div>
+        <div class="section-title">Links <span style="font-family:'DM Sans';font-size:0.75rem;color:var(--muted);font-weight:400;font-style:normal;letter-spacing:0;">(optional)</span></div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="field-group">
+            <label>Source URL</label>
+            <input type="url" id="f-source" placeholder="https://original-recipe-website.com/recipe" />
+          </div>
+          <div class="field-group">
+            <label>YouTube Video URL</label>
+            <input type="url" id="f-youtube" placeholder="https://www.youtube.com/watch?v=…" />
+          </div>
+          <div class="field-group">
+            <label>Extra Tags <span class="optional">(comma-separated keywords for matching)</span></label>
+            <input type="text" id="f-tags" placeholder="e.g. gluten-free, weeknight, comfort food" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button class="btn-primary" id="generateBtn">Generate Recipe HTML ✦</button>
+        <button class="btn-secondary" id="copySnippetBtn" style="display:none">📋 Copy snippet to clipboard</button>
+        <button class="btn-secondary" id="downloadUpdatedBtn" style="display:none">⬇ Download updated recipes.html</button>
+        <button class="btn-ghost" id="clearFormBtn">Clear form</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── RIGHT: SIDEBAR ── -->
+  <div class="sidebar">
+
+    <!-- Live preview -->
+    <div class="preview-card">
+      <div class="preview-header">
+        Live Preview
+        <span class="preview-live">● updates as you type</span>
+      </div>
+      <div id="previewImgWrap" class="preview-no-img">🍽️</div>
+      <div class="preview-body">
+        <div class="preview-meta" id="previewMeta"></div>
+        <div class="preview-name" id="previewName">Recipe name will appear here</div>
+        <div class="preview-desc" id="previewDesc"></div>
+        <div class="preview-ings" id="previewIngs">
+          <span class="preview-empty">Ingredients will appear here</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generated snippet -->
+    <div class="output-card" id="outputCard">
+      <div class="output-header">
+        Generated HTML Snippet
+        <button class="copy-btn" id="copyBtn">Copy</button>
+      </div>
+      <pre class="output-code" id="outputCode"></pre>
+    </div>
+
+    <!-- How-to instructions -->
+    <div class="instructions-card">
+      <div class="instructions-title">How to save your recipe</div>
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <div class="step-text">Fill in the form and click <strong>Generate Recipe HTML</strong></div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <div class="step-text">Choose your save method:<br>
+          <strong>Copy snippet</strong> → paste into <code>recipes.html</code> in GitHub's editor<br>
+          <strong>Download updated file</strong> → replaces your whole <code>recipes.html</code>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">3</div>
+        <div class="step-text">Upload / commit to GitHub — your recipe book updates in ~60 seconds</div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Dynamic list builders ──────────────────────────────────────
+
+function makeIngredientRow(measure = '', name = '') {
+  const row = document.createElement('div');
+  row.className = 'list-item-row';
+  row.draggable = true;
+  row.innerHTML = `
+    <span class="drag-handle" title="Drag to reorder">⠿</span>
+    <input class="measure-input" type="text" placeholder="2 tbsp" value="${escHtml(measure)}" />
+    <input type="text" placeholder="ingredient name" value="${escHtml(name)}" />
+    <button class="remove-row-btn" title="Remove">✕</button>`;
+  row.querySelector('.remove-row-btn').addEventListener('click', () => {
+    row.style.opacity = '0'; row.style.transform = 'scale(0.95)';
+    row.style.transition = 'all 0.15s';
+    setTimeout(() => { row.remove(); updatePreview(); }, 150);
+  });
+  row.querySelectorAll('input').forEach(i => i.addEventListener('input', updatePreview));
+  addDragHandlers(row, document.getElementById('ingredientsList'));
+  return row;
+}
+
+function makeStepRow(text = '') {
+  const list = document.getElementById('stepsList');
+  const idx  = list.querySelectorAll('.list-item-row').length + 1;
+  const row  = document.createElement('div');
+  row.className = 'list-item-row';
+  row.draggable = true;
+  row.innerHTML = `
+    <span class="drag-handle" title="Drag to reorder">⠿</span>
+    <span class="step-number">${idx}</span>
+    <input type="text" placeholder="Describe this step…" value="${escHtml(text)}" style="flex:1" />
+    <button class="remove-row-btn" title="Remove">✕</button>`;
+  row.querySelector('.remove-row-btn').addEventListener('click', () => {
+    row.style.opacity = '0'; row.style.transform = 'scale(0.95)';
+    row.style.transition = 'all 0.15s';
+    setTimeout(() => { row.remove(); renumberSteps(); updatePreview(); }, 150);
+  });
+  row.querySelector('input').addEventListener('input', updatePreview);
+  addDragHandlers(row, document.getElementById('stepsList'));
+  return row;
+}
+
+function renumberSteps() {
+  document.getElementById('stepsList').querySelectorAll('.step-number').forEach((el, i) => {
+    el.textContent = i + 1;
+  });
+}
+
+// ── Drag-to-reorder ────────────────────────────────────────────
+let dragSrc = null;
+
+function addDragHandlers(row, container) {
+  row.addEventListener('dragstart', () => { dragSrc = row; row.classList.add('dragging'); });
+  row.addEventListener('dragend',   () => { dragSrc = null; row.classList.remove('dragging'); container.querySelectorAll('.list-item-row').forEach(r => r.classList.remove('drag-over')); updatePreview(); renumberSteps(); });
+  row.addEventListener('dragover',  e  => { e.preventDefault(); container.querySelectorAll('.list-item-row').forEach(r => r.classList.remove('drag-over')); if (dragSrc !== row) row.classList.add('drag-over'); });
+  row.addEventListener('drop',      e  => {
+    e.preventDefault();
+    if (dragSrc && dragSrc !== row) {
+      const rows = [...container.querySelectorAll('.list-item-row')];
+      const si = rows.indexOf(dragSrc), ti = rows.indexOf(row);
+      container.insertBefore(dragSrc, si < ti ? row.nextSibling : row);
+    }
+    container.querySelectorAll('.list-item-row').forEach(r => r.classList.remove('drag-over'));
+    renumberSteps(); updatePreview();
+  });
+}
+
+// Add defaults
+function addIngredientRow(m = '', n = '') {
+  document.getElementById('ingredientsList').appendChild(makeIngredientRow(m, n));
+  updatePreview();
+}
+function addStepRow(t = '') {
+  document.getElementById('stepsList').appendChild(makeStepRow(t));
+  updatePreview();
+}
+
+document.getElementById('addIngredientBtn').addEventListener('click', () => addIngredientRow());
+document.getElementById('addStepBtn').addEventListener('click', () => addStepRow());
+
+// Start with 3 blank ingredient rows and 2 step rows
+for (let i = 0; i < 3; i++) addIngredientRow();
+for (let i = 0; i < 2; i++) addStepRow();
+
+// ── Helpers ────────────────────────────────────────────────────
+function escHtml(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function val(id) { return (document.getElementById(id)?.value || '').trim(); }
+
+function getIngredients() {
+  return [...document.getElementById('ingredientsList').querySelectorAll('.list-item-row')]
+    .map(row => {
+      const inputs = row.querySelectorAll('input');
+      return { measure: inputs[0].value.trim(), name: inputs[1].value.trim() };
+    })
+    .filter(r => r.name);
+}
+
+function getSteps() {
+  return [...document.getElementById('stepsList').querySelectorAll('.list-item-row input')]
+    .map(i => i.value.trim()).filter(Boolean);
+}
+
+function emojiFor(name) {
+  const n = (name || '').toLowerCase();
+  const map = [
+    [['chicken'],'🍗'],[['beef','steak','mince'],'🥩'],[['pork','bacon','ham'],'🥓'],
+    [['fish','salmon','tuna','prawn','shrimp'],'🐟'],[['egg'],'🥚'],[['milk','cream'],'🥛'],
+    [['cheese'],'🧀'],[['butter'],'🧈'],[['tomato'],'🍅'],[['onion'],'🧅'],[['garlic'],'🧄'],
+    [['potato'],'🥔'],[['carrot'],'🥕'],[['broccoli'],'🥦'],
+    [['spinach','kale','basil','parsley','rosemary'],'🌿'],[['lemon','lime'],'🍋'],
+    [['rice'],'🍚'],[['pasta','spaghetti','noodle'],'🍝'],[['bread','flour'],'🍞'],
+    [['mushroom'],'🍄'],[['chocolate','cocoa'],'🍫'],[['sugar','honey'],'🍯'],
+    [['pepper','chilli'],'🌶️'],[['olive'],'🫒'],[['salt'],'🧂'],[['oil'],'🫙'],
+  ];
+  for (const [keys, emoji] of map) { if (keys.some(k => n.includes(k))) return emoji; }
+  return '🌿';
+}
+
+function showToast(msg, duration = 2200) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+// ── Live preview ───────────────────────────────────────────────
+function updatePreview() {
+  const name   = val('f-name');
+  const desc   = val('f-description');
+  const img    = val('f-image');
+  const time   = val('f-time');
+  const diff   = val('f-difficulty');
+  const serv   = val('f-servings');
+  const cat    = val('f-category');
+  const cuis   = val('f-cuisine');
+  const ings   = getIngredients();
+
+  // Image
+  const imgWrap = document.getElementById('previewImgWrap');
+  if (img) {
+    imgWrap.outerHTML; // noop to keep reference
+    imgWrap.innerHTML = `<img src="${img}" style="width:100%;height:140px;object-fit:cover;display:block" onerror="this.parentElement.innerHTML='<div style=\'height:140px;display:flex;align-items:center;justify-content:center;font-size:3rem;opacity:.2\'>🍽️</div>'" />`;
+    imgWrap.className = 'preview-img-wrap';
+    imgWrap.style.background = 'none';
+  } else {
+    imgWrap.innerHTML = '🍽️';
+    imgWrap.className = 'preview-no-img';
+    imgWrap.style = '';
+  }
+
+  document.getElementById('previewName').textContent = name || 'Recipe name will appear here';
+  document.getElementById('previewDesc').textContent = desc;
+
+  const meta = document.getElementById('previewMeta');
+  meta.innerHTML = [
+    time ? `<span class="preview-badge">⏱ ${time}</span>` : '',
+    diff ? `<span class="preview-badge">${diff}</span>` : '',
+    serv ? `<span class="preview-badge">Serves ${serv}</span>` : '',
+    cat  ? `<span class="preview-badge">${cat}</span>` : '',
+    cuis ? `<span class="preview-badge">🌍 ${cuis}</span>` : '',
+  ].join('');
+
+  const ingsEl = document.getElementById('previewIngs');
+  if (ings.length > 0) {
+    ingsEl.innerHTML = ings.map(({ name: n, measure: m }) =>
+      `<span class="preview-ing">${emojiFor(n)} ${m ? m + ' ' : ''}${n}</span>`
+    ).join('');
+  } else {
+    ingsEl.innerHTML = '<span class="preview-empty">Ingredients will appear here</span>';
+  }
+}
+
+// Live-bind all simple inputs
+['f-name','f-category','f-cuisine','f-time','f-difficulty','f-servings','f-image','f-description','f-tip'].forEach(id => {
+  document.getElementById(id)?.addEventListener('input', updatePreview);
+  document.getElementById(id)?.addEventListener('change', updatePreview);
+});
+
+// ── Generate HTML snippet ──────────────────────────────────────
+function generateSnippet() {
+  const name  = val('f-name');
+  const ings  = getIngredients();
+  const steps = getSteps();
+
+  if (!name)         { showToast('⚠️ Please enter a recipe name'); return null; }
+  if (ings.length === 0)  { showToast('⚠️ Please add at least one ingredient'); return null; }
+  if (steps.length === 0) { showToast('⚠️ Please add at least one step'); return null; }
+
+  const e = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  const ingLines  = ings.map(({ measure, name: n }) =>
+    `    <li>${e(measure ? measure + ', ' + n : n)}</li>`).join('\n');
+  const stepLines = steps.map(s => `    <li>${e(s)}</li>`).join('\n');
+
+  const fields = [
+    ['r-name',        val('f-name')],
+    ['r-category',    val('f-category')],
+    ['r-cuisine',     val('f-cuisine')],
+    ['r-time',        val('f-time')],
+    ['r-difficulty',  val('f-difficulty')],
+    ['r-servings',    val('f-servings')],
+    ['r-image',       val('f-image')],
+    ['r-description', val('f-description')],
+    ['r-tip',         val('f-tip')],
+  ].filter(([, v]) => v);
+
+  const fieldLines = fields.map(([tag, v]) => `  <${tag}>${e(v)}</${tag}>`).join('\n');
+
+  const source  = val('f-source');
+  const youtube = val('f-youtube');
+  const tags    = val('f-tags');
+  const extras  = [
+    source  ? `  <r-source>${e(source)}</r-source>`   : '',
+    youtube ? `  <r-youtube>${e(youtube)}</r-youtube>` : '',
+    tags    ? `  <r-tags>${e(tags)}</r-tags>`           : '',
+  ].filter(Boolean).join('\n');
+
+  return `\n<article class="recipe">\n${fieldLines}\n  <r-ingredients>\n${ingLines}\n  </r-ingredients>\n  <r-steps>\n${stepLines}\n  </r-steps>${extras ? '\n' + extras : ''}\n</article>\n`;
+}
+
+// ── Generate button ────────────────────────────────────────────
+document.getElementById('generateBtn').addEventListener('click', () => {
+  const snippet = generateSnippet();
+  if (!snippet) return;
+
+  const outputCard = document.getElementById('outputCard');
+  document.getElementById('outputCode').textContent = snippet;
+  outputCard.classList.add('visible');
+  document.getElementById('copySnippetBtn').style.display = '';
+  document.getElementById('downloadUpdatedBtn').style.display = '';
+  outputCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  showToast('✅ Recipe HTML generated!');
+});
+
+// ── Copy snippet ───────────────────────────────────────────────
+function copySnippet() {
+  const snippet = document.getElementById('outputCode').textContent;
+  if (!snippet) { showToast('Generate the recipe first'); return; }
+  navigator.clipboard.writeText(snippet).then(() => {
+    showToast('📋 Snippet copied! Paste it into recipes.html on GitHub.');
+  });
+}
+document.getElementById('copyBtn').addEventListener('click', () => {
+  copySnippet();
+  const btn = document.getElementById('copyBtn');
+  btn.textContent = 'Copied!'; btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+});
+document.getElementById('copySnippetBtn').addEventListener('click', copySnippet);
+
+// ── Download updated recipes.html ─────────────────────────────
+document.getElementById('downloadUpdatedBtn').addEventListener('click', async () => {
+  const snippet = generateSnippet();
+  if (!snippet) return;
+
+  let existingContent = '';
+  try {
+    const res = await fetch('recipes.html');
+    if (res.ok) {
+      existingContent = await res.text();
+      // Insert new recipe before the closing </body> tag
+      existingContent = existingContent.replace(
+        /(\n?<!-- ═+\n<!--\s*ADD YOUR OWN[\s\S]*?-->[\s\S]*?)?(\n?<\/body>)/,
+        (match, addSection, closeBody) => snippet + (addSection || '') + closeBody
+      );
+      // If the replacement didn't work (different file structure), just append before </body>
+      if (!existingContent.includes(snippet.trim())) {
+        existingContent = existingContent.replace('</body>', snippet + '\n</body>');
+      }
+    }
+  } catch {
+    existingContent = null;
+  }
+
+  if (!existingContent) {
+    showToast('⚠️ Could not load recipes.html — copying snippet instead');
+    copySnippet();
+    return;
+  }
+
+  const blob = new Blob([existingContent], { type: 'text/html' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'recipes.html'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('⬇ Downloaded! Upload this file to GitHub to replace your recipe book.');
+});
+
+// ── Clear form ─────────────────────────────────────────────────
+document.getElementById('clearFormBtn').addEventListener('click', () => {
+  ['f-name','f-category','f-cuisine','f-time','f-difficulty','f-servings',
+   'f-image','f-description','f-tip','f-source','f-youtube','f-tags'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('ingredientsList').innerHTML = '';
+  document.getElementById('stepsList').innerHTML = '';
+  for (let i = 0; i < 3; i++) addIngredientRow();
+  for (let i = 0; i < 2; i++) addStepRow();
+  document.getElementById('outputCard').classList.remove('visible');
+  document.getElementById('copySnippetBtn').style.display = 'none';
+  document.getElementById('downloadUpdatedBtn').style.display = 'none';
+  updatePreview();
+  showToast('Form cleared');
+});
+
+// Initial preview render
+updatePreview();
+</script>
+</body>
+</html>
