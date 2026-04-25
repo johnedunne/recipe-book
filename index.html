@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head> 
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Recipe Book</title>
@@ -29,7 +29,8 @@
   .logo span { color: var(--amber); font-style: italic; }
   .tagline { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; }
   .recipe-count { font-size: 0.7rem; background: rgba(201,125,46,0.12); color: var(--amber); padding: 3px 10px; border-radius: 100px; font-weight: 500; }
-  .nav-link { margin-left: auto; font-size: 0.8rem; color: var(--amber); text-decoration: none; font-weight: 500; padding: 7px 14px; border: 1.5px solid rgba(201,125,46,0.3); border-radius: 8px; transition: all 0.2s; white-space: nowrap; }
+  .nav-links { margin-left: auto; display: flex; gap: 8px; }
+  .nav-link { font-size: 0.8rem; color: var(--amber); text-decoration: none; font-weight: 500; padding: 7px 14px; border: 1.5px solid rgba(201,125,46,0.3); border-radius: 8px; transition: all 0.2s; white-space: nowrap; }
   .nav-link:hover { background: var(--amber); color: white; }
 
   /* LEFT PANEL */
@@ -203,7 +204,10 @@
     <div class="logo">My <span>Recipe</span> Book</div>
     <div class="tagline">Personal Collection</div>
     <span class="recipe-count" id="recipeCount">Loading…</span>
-    <a href="editor.html" class="nav-link">+ Add Recipe</a>
+    <div class="nav-links">
+      <a href="planner.html" class="nav-link">📅 Meal Planner</a>
+      <a href="editor.html" class="nav-link">+ Add Recipe</a>
+    </div>
   </header>
 
   <!-- LEFT PANEL -->
