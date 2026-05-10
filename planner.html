@@ -131,7 +131,6 @@
   .shop-item.checked .shop-cb { background: var(--green); border-color: var(--green); color: white; }
   .si-name { flex: 1; color: var(--ink); }
   .si-qty  { font-size: 0.75rem; color: var(--sage); font-weight: 600; white-space: nowrap; }
-  .si-src  { font-size: 0.65rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
 
   /* Shopping sidebar */
   .shop-sidebar { display: flex; flex-direction: column; gap: 12px; position: sticky; top: 82px; }
@@ -631,12 +630,10 @@ function buildShoppingList(){
         ${items.map(ing=>{
           const ck=checked.has(ing.displayName);
           const qty=summariseQtys(ing.measures);
-          const src=[...new Set(ing.measures.map(m=>m.recipeName))].join(', ');
           return`<div class="shop-item${ck?' checked':''}" onclick="toggleCheck('${ing.displayName.replace(/'/g,"\\'")}',this)">
             <div class="shop-cb">${ck?'✓':''}</div>
             <span class="si-name">${emojiFor(ing.displayName)} ${ing.displayName}</span>
             ${qty?`<span class="si-qty">${qty}</span>`:''}
-            <span class="si-src" title="${src}">${src}</span>
           </div>`;
         }).join('')}
       </div>`;
