@@ -707,7 +707,7 @@ document.getElementById('downloadUpdatedBtn').addEventListener('click', async ()
 
   let existingContent = '';
   try {
-    const res = await fetch('recipes.html');
+    const res = await fetch('recipes.html', { cache: 'no-cache' });
     if (res.ok) {
       existingContent = await res.text();
       // Insert new recipe before the closing </body> tag
