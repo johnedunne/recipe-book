@@ -409,7 +409,7 @@ function toast(msg,dur=2400){
 // ═══════════════════════════════════════════
 async function loadRecipes(){
   try{
-    const res=await fetch('recipes.html');
+    const res=await fetch('recipes.html', { cache: 'no-cache' });
     if(!res.ok)throw new Error('HTTP '+res.status);
     const doc=new DOMParser().parseFromString(await res.text(),'text/html');
     const nodes=doc.querySelectorAll('article.recipe');
