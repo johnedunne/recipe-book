@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sara's Recipe Book</title>
+<title>My Recipe Book</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -104,6 +104,10 @@
   .show-all-btn:hover { color: var(--amber); border-color: var(--amber); }
   .db-note { font-size: 0.68rem; color: var(--muted); text-align: center; line-height: 1.55; padding-top: 8px; border-top: 1px solid var(--border); }
   .db-note strong { color: var(--brown); }
+  .reload-btn { width: 100%; padding: 8px; background: transparent; border: 1.5px dashed var(--border); border-radius: 10px; font-size: 0.78rem; color: var(--muted); cursor: pointer; transition: color 0.2s, border-color 0.2s, background 0.2s; }
+  .reload-btn:hover { color: var(--amber); border-color: var(--amber); background: rgba(201,125,46,0.04); }
+  .reload-btn.spinning { animation: spinOnce 0.6s ease; color: var(--amber); border-color: var(--amber); }
+  @keyframes spinOnce { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
   /* RIGHT PANEL */
   .right-panel { padding: 26px 34px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
@@ -201,7 +205,7 @@
 <div class="app">
 
   <header>
-    <div class="logo">Sara's <span>Recipe</span> Book</div>
+    <div class="logo">My <span>Recipe</span> Book</div>
     <div class="tagline">Personal Collection</div>
     <span class="recipe-count" id="recipeCount">Loading…</span>
     <div class="nav-links">
@@ -308,7 +312,8 @@
     </div>
     <button class="show-all-btn" id="showAllBtn">Show all recipes</button>
 
-    <div class="db-note">Reading from <strong>recipes.html</strong> — add recipes via the editor and refresh.</div>
+    <button class="reload-btn" id="reloadBtn" title="Re-fetch recipes.html">↻ Reload recipes</button>
+    <div class="db-note">Reading from <strong>recipes.html</strong> — after committing new recipes, click reload above to pick up changes without refreshing the page.</div>
   </div>
 
   <!-- RIGHT PANEL -->
@@ -439,7 +444,7 @@ function emojiFor(name) {
 // ═══════════════════════════════════════════════════════════════
 async function loadRecipes() {
   try {
-    const res = await fetch('recipes.html');
+    const res = await fetch('recipes.html', { cache: 'no-cache' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const text = await res.text();
     const doc  = new DOMParser().parseFromString(text, 'text/html');
@@ -499,6 +504,49 @@ function showError(msg) { rightPanel.innerHTML=`<div class="error-state">⚠️ 
   cats.forEach(cat=>{ const o=document.createElement('option'); o.value=o.textContent=cat; categorySelect.appendChild(o); });
   rightPanel.innerHTML=`<div class="empty-state"><div class="empty-icon">📖</div><h3>${ALL_RECIPES.length} recipes loaded</h3><p>Add ingredients to find matching recipes, or browse everything.</p></div>`;
 })();
+
+// ═══════════════════════════════════════════════════════════════
+//  RELOAD RECIPES — re-fetches recipes.html without page refresh
+// ═══════════════════════════════════════════════════════════════
+document.getElementById('reloadBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('reloadBtn');
+  btn.textContent = '↻ Reloading…';
+  btn.classList.add('spinning');
+  btn.disabled = true;
+
+  const fresh = await loadRecipes();
+
+  btn.classList.remove('spinning');
+  btn.disabled = false;
+
+  if (!fresh.length) {
+    btn.textContent = '↻ Reload recipes';
+    return; // loadRecipes already shows an error
+  }
+
+  const prevCount = ALL_RECIPES.length;
+  ALL_RECIPES = fresh;
+  const newCount = ALL_RECIPES.length;
+  const added = newCount - prevCount;
+
+  // Rebuild category dropdown from fresh data
+  categorySelect.innerHTML = '<option value="">All Categories</option>';
+  const cats = [...new Set(ALL_RECIPES.map(r=>r.category).filter(Boolean))].sort();
+  cats.forEach(cat=>{ const o=document.createElement('option'); o.value=o.textContent=cat; categorySelect.appendChild(o); });
+
+  recipeCount.textContent = `${newCount} recipe${newCount!==1?'s':''}`;
+  btn.textContent = added > 0
+    ? `↻ Reload recipes (+${added} new)`
+    : '↻ Reload recipes';
+
+  // Reset to welcome state so stale results aren't shown
+  rightPanel.innerHTML=`<div class="empty-state"><div class="empty-icon">📖</div>
+    <h3>${newCount} recipes loaded</h3>
+    <p>${added > 0 ? `${added} new recipe${added!==1?'s':''} added!` : 'Recipe book is up to date.'} Add ingredients to search.</p>
+  </div>`;
+
+  setTimeout(() => { btn.textContent = '↻ Reload recipes'; }, 4000);
+});
 
 // ═══════════════════════════════════════════════════════════════
 //  MODE SWITCHING
