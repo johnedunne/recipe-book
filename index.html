@@ -444,7 +444,7 @@ function emojiFor(name) {
 // ═══════════════════════════════════════════════════════════════
 async function loadRecipes() {
   try {
-    const res = await fetch('recipes.html', { cache: 'no-cache' });
+    const res = await fetch('recipes.html?_=' + Date.now(), { cache: 'no-store' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const text = await res.text();
     const doc  = new DOMParser().parseFromString(text, 'text/html');
